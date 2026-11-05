@@ -13,6 +13,11 @@ let
       self.nixosModules.authentik
       ({ pkgs, ... }: {
         system.stateVersion = "26.05";
+        boot.isContainer = true;
+        fileSystems."/" = {
+          device = "none";
+          fsType = "tmpfs";
+        };
         services.movie-night = {
           enable = true;
           package = pkgs.hello;
@@ -46,7 +51,8 @@ let
   };
   cfg = eval.config;
   valid =
-    cfg.systemd.services.movie-night.serviceConfig.DynamicUser
+    builtins.all (entry: entry.assertion) cfg.assertions
+    && cfg.systemd.services.movie-night.serviceConfig.DynamicUser
     &&
       cfg.services.nginx.virtualHosts."watch.example.org".locations."/internal/".extraConfig
       == "return 404;"

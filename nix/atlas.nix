@@ -85,6 +85,7 @@ in
       isSystemUser = true;
       group = "movie-night-relay";
     };
+    users.users.nginx.extraGroups = [ "movie-night-relay" ];
     security.acme.certs.${cfg.relayDomain} = {
       group = "movie-night-relay";
     };
