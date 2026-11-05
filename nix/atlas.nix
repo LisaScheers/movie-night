@@ -132,7 +132,7 @@ in
               internal;
               proxy_pass_request_body off;
               proxy_set_header Content-Length "";
-              proxy_set_header Host ${cfg.domain};
+              proxy_set_header Host $proxy_host;
               proxy_set_header X-Forwarded-Host ${cfg.domain};
               proxy_set_header X-Forwarded-Proto https;
               proxy_set_header X-Original-URL https://${cfg.domain}$request_uri;
@@ -144,7 +144,7 @@ in
           "/outpost.goauthentik.io/" = {
             proxyPass = "${cfg.authentikUrl}/outpost.goauthentik.io/";
             extraConfig = ''
-              proxy_set_header Host ${cfg.domain};
+              proxy_set_header Host $proxy_host;
               proxy_set_header X-Forwarded-Host ${cfg.domain};
               proxy_set_header X-Forwarded-Proto https;
               proxy_ssl_server_name on;
