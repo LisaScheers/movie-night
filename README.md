@@ -69,7 +69,7 @@ On Atlas:
 
 ## Practical limits
 
-This is shared live playback, with an authoritative source clock and low-latency subscribers, not frame-accurate synchronization. Decoder/network buffering can cause small differences between viewers. Pause/resume and seeking briefly prepare a fresh stream. A sudden power loss can lose up to five seconds of the latest playback checkpoint.
+This is shared live playback, with an authoritative source clock and low-latency subscribers, not frame-accurate synchronization. Streams use fragmented MP4/CMAF and default to a one-second playback delay to absorb network jitter. A stalled video decoder restarts locally without pausing the room or interrupting audio. Decoder/network buffering can cause small differences between viewers. Pause/resume and seeking briefly prepare a fresh stream. A sudden power loss can lose up to five seconds of the latest playback checkpoint.
 
 Chromium with WebCodecs and WebTransport is the primary target. The upstream player handles capability errors and WebSocket fallback. Second Life's embedded browser needs its own codec/WebTransport acceptance check; this project does not silently fall back to direct HLS from Nook.
 

@@ -114,7 +114,18 @@ async function screening() {
   app.className = 'screening'; app.replaceChildren();
   const ui = document.createElement('moq-watch-ui'); const watch = new MoqWatch();
   watch.setAttribute('muted', ''); watch.setAttribute('visible', 'always'); watch.setAttribute('paused', '');
+  watch.setAttribute('delay', '1s');
   watch.append(element('canvas')); ui.append(watch); app.append(ui);
+  // A decoder error closes the upstream video subscription; restart it locally.
+  watch.signals.run(effect => {
+    if (effect.get(watch.controls.paused) || !effect.get(watch.video.out.stalled)
+      || effect.get(watch.video.source.out.error)) return;
+    effect.timer(() => {
+      watch.visible = 'never';
+      const retry = setTimeout(() => { watch.visible = 'always'; }, 50);
+      effect.cleanup(() => { clearTimeout(retry); watch.visible = 'always'; });
+    }, 3000);
+  });
   // Upstream controls retain their layout and local volume/quality settings.
   const applyPaused = bindSharedPause(watch, paused => { void command({ action: paused ? 'pause' : 'play' }); });
   const top = element('header', 'screen-top');

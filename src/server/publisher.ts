@@ -37,7 +37,8 @@ export async function ffmpegArgs(config: Config, room: Room, source: Source): Pr
   if (!config.vaapi) args.push('-preset', 'veryfast', '-tune', 'zerolatency', '-profile:v', 'high');
   args.push('-b:v', '5000k', '-maxrate', '6000k', '-bufsize', '10000k', '-r', '30', '-g', '30', '-bf', '0',
     '-c:a', 'aac', '-ac', '2', '-ar', '48000', '-b:a', '160k', '-progress', 'pipe:3',
-    '-f', 'mpegts', '-pes_payload_size', '0', '-muxdelay', '0', 'pipe:1');
+    '-avoid_negative_ts', 'make_zero', '-f', 'mp4', '-movflags', '+empty_moov+default_base_moof',
+    '-frag_duration', '200000', '-flush_packets', '1', 'pipe:1');
   return args;
 }
 async function terminate(child: ChildProcess) {
@@ -54,7 +55,7 @@ export class FFmpegPublisher implements Publisher {
   async start(room: Room, source: Source, ready: (position: number) => void, ended: (error: string | null) => void): Promise<Running> {
     const args = await ffmpegArgs(this.config, room, source);
     const moq = spawn(this.config.moq, ['--connect', streamUrl(this.config.relayConnectUrl, this.config.secret, room, 'publisher'),
-      '--broadcast', `${room.generation}.hang`, 'import', 'ts'], { stdio: ['pipe', 'ignore', 'pipe'] });
+      '--broadcast', `${room.generation}.hang`, 'import', 'fmp4'], { stdio: ['pipe', 'ignore', 'pipe'] });
     const ffmpeg = spawn(this.config.ffmpeg, args, { stdio: ['ignore', 'pipe', 'pipe', 'pipe'] });
     let stopped = false, finished = false, prepared = false, progress = '';
     const stop = async () => { stopped = true; clearTimeout(timeout); await Promise.all([terminate(ffmpeg), terminate(moq)]); };

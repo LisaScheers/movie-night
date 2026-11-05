@@ -26,7 +26,7 @@ async function until(check: () => boolean | Promise<boolean>) {
   while (Date.now() < deadline) { if (await check()) return; await delay(100); }
   throw new Error('Timed out waiting for the streaming boundary');
 }
-test('real FFmpeg → authenticated MoQ relay → subscriber; global pause, resume and seek', { skip: process.env.MOVIE_NIGHT_INTEGRATION !== '1', timeout: 45_000 }, async t => {
+test('real fragmented MP4 → authenticated MoQ relay → subscriber; global pause, resume and seek', { skip: process.env.MOVIE_NIGHT_INTEGRATION !== '1', timeout: 45_000 }, async t => {
   const dir = await mkdtemp(join(tmpdir(), 'movie-night-stream-')); const filename = join(dir, 'synthetic.mkv');
   t.after(() => rm(dir, { recursive: true, force: true }));
   execFileSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-f', 'lavfi', '-i', 'testsrc2=size=320x180:rate=30', '-f', 'lavfi', '-i', 'sine=frequency=220:sample_rate=48000', '-t', '24', '-c:v', 'libx264', '-preset', 'ultrafast', '-c:a', 'aac', filename]);
@@ -46,7 +46,7 @@ test('real FFmpeg → authenticated MoQ relay → subscriber; global pause, resu
   const first = rooms.state(store.get('test')!); assert.ok(first.stream);
   async function receive() {
     const state = rooms.state(store.get('test')!); assert.ok(state.stream);
-    const child = spawn('moq', ['--connect', state.stream.url, '--broadcast', state.stream.name, 'export', 'ts'], { stdio: ['ignore', 'pipe', 'pipe'] });
+    const child = spawn('moq', ['--connect', state.stream.url, '--broadcast', state.stream.name, 'export', 'fmp4'], { stdio: ['ignore', 'pipe', 'pipe'] });
     let bytes = 0; let diagnostics = '';
     child.stdout.on('data', (chunk: Buffer) => { bytes += chunk.length; });
     child.stderr.on('data', (chunk: Buffer) => { diagnostics = (diagnostics + chunk.toString()).slice(-4096); });
