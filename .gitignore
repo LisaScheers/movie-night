@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.direnv/
+.devenv/
+.env
+.env.*
+!.env.example
+state/
+result*
+*.log
+
+.DS_Store

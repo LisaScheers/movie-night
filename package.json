@@ -1,0 +1,27 @@
+{
+  "name": "movie-night",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "server": "node --env-file-if-exists=.env --disable-warning=ExperimentalWarning src/server/main.ts",
+    "build": "tsc --noEmit && vite build",
+    "check": "tsc --noEmit",
+    "test": "node --disable-warning=ExperimentalWarning --test test/*.test.ts",
+    "test:stream": "MOVIE_NIGHT_INTEGRATION=1 node --disable-warning=ExperimentalWarning --test test/stream.test.ts",
+    "preview:synthetic": "node --disable-warning=ExperimentalWarning test/preview.ts"
+  },
+  "dependencies": {
+    "@moq/watch": "0.6.6"
+  },
+  "devDependencies": {
+    "@types/node": "24.10.0",
+    "typescript": "5.9.3",
+    "vite": "7.3.7"
+  }
+}

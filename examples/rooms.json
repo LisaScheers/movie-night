@@ -1,0 +1,4 @@
+[
+  { "id": "movie-night", "name": "Movie night", "path": "/r/movie-night" },
+  { "id": "series-night", "name": "Series night", "path": "/series" }
+]
