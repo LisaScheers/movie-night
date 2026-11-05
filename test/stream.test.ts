@@ -29,7 +29,9 @@ async function until(check: () => boolean | Promise<boolean>) {
 test('real fragmented MP4 → authenticated MoQ relay → subscriber; global pause, resume and seek', { skip: process.env.MOVIE_NIGHT_INTEGRATION !== '1', timeout: 45_000 }, async t => {
   const dir = await mkdtemp(join(tmpdir(), 'movie-night-stream-')); const filename = join(dir, 'synthetic.mkv');
   t.after(() => rm(dir, { recursive: true, force: true }));
-  execFileSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-f', 'lavfi', '-i', 'testsrc2=size=320x180:rate=30', '-f', 'lavfi', '-i', 'sine=frequency=220:sample_rate=48000', '-t', '24', '-c:v', 'libx264', '-preset', 'ultrafast', '-c:a', 'aac', filename]);
+  const chapters = join(dir, 'chapters.ffmeta');
+  await writeFile(chapters, ';FFMETADATA1\n[CHAPTER]\nTIMEBASE=1/1000\nSTART=0\nEND=24000\ntitle=Intro\n');
+  execFileSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-f', 'lavfi', '-i', 'testsrc2=size=320x180:rate=30', '-f', 'lavfi', '-i', 'sine=frequency=220:sample_rate=48000', '-f', 'ffmetadata', '-i', chapters, '-map_chapters', '2', '-t', '24', '-c:v', 'libx264', '-preset', 'ultrafast', '-c:a', 'aac', filename]);
   const upstream = await fakeJellyfin(filename, 24); t.after(() => upstream.close());
   const port = await freePort(); const cfg = config({ relayUrl: `http://localhost:${port}`, relayConnectUrl: `http://localhost:${port}`, jellyfinUrl: upstream.url, jellyfinKey: 'fixture-key', mediaRoots: [dir] });
   const store = new Store(':memory:', [{ id: 'test', name: 'Test', path: '/test' }]);

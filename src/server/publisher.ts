@@ -31,7 +31,7 @@ export async function ffmpegArgs(config: Config, room: Room, source: Source): Pr
   }
   if (videoFilter) args.push('-map', '0:v:0', '-vf', videoFilter + (config.vaapi ? ',format=nv12,hwupload' : ''));
   else if (config.vaapi) throw new Error('Bitmap subtitles require software encoding; unset MOVIE_NIGHT_VAAPI_DEVICE');
-  args.push('-map', room.audio === null ? '0:a:0?' : `0:${room.audio}`, '-sn', '-dn');
+  args.push('-map', room.audio === null ? '0:a:0?' : `0:${room.audio}`, '-sn', '-dn', '-map_metadata', '-1', '-map_chapters', '-1');
   if (config.vaapi) args.unshift('-vaapi_device', config.vaapi);
   args.push('-c:v', config.vaapi ? 'h264_vaapi' : 'libx264');
   if (!config.vaapi) args.push('-preset', 'veryfast', '-tune', 'zerolatency', '-profile:v', 'high');
