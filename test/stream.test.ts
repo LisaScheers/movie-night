@@ -49,14 +49,25 @@ test('real fragmented MP4 → authenticated MoQ relay → subscriber; global pau
   async function receive() {
     const state = rooms.state(store.get('test')!); assert.ok(state.stream);
     const child = spawn('moq', ['--connect', state.stream.url, '--broadcast', state.stream.name, 'export', 'fmp4'], { stdio: ['ignore', 'pipe', 'pipe'] });
-    let bytes = 0; let diagnostics = '';
-    child.stdout.on('data', (chunk: Buffer) => { bytes += chunk.length; });
+    let bytes = 0; let diagnostics = ''; const chunks: Buffer[] = [];
+    child.stdout.on('data', (chunk: Buffer) => { bytes += chunk.length; chunks.push(chunk); });
     child.stderr.on('data', (chunk: Buffer) => { diagnostics = (diagnostics + chunk.toString()).slice(-4096); });
     try { await until(() => { if (child.exitCode !== null && bytes === 0) throw new Error(diagnostics); return bytes > 20_000; }); }
-    finally { child.kill('SIGTERM'); }
+    finally { child.kill('SIGTERM'); await Promise.race([once(child, 'close'), delay(1000)]); }
     assert.ok(bytes > 20_000);
+    const output = Buffer.concat(chunks); let complete = 0;
+    while (complete + 8 <= output.length) {
+      let size = output.readUInt32BE(complete);
+      if (size === 1) { if (complete + 16 > output.length) break; size = Number(output.readBigUInt64BE(complete + 8)); }
+      if (size < 8 || complete + size > output.length) break;
+      complete += size;
+    }
+    // Drop a final partial MP4 box from stopping the subscriber, then decode its first samples.
+    execFileSync('ffmpeg', ['-nostdin', '-hide_banner', '-loglevel', 'error', '-xerror', '-i', 'pipe:0', '-t', '0.1', '-f', 'null', '-'],
+      { input: output.subarray(0, complete), stdio: ['pipe', 'ignore', 'pipe'], timeout: 10_000 });
   }
   await receive();
+  await delay(2300); await receive(); // A late join must also start with independently decodable video.
   const paused = await rooms.command('test', { action: 'pause' });
   assert.equal(rooms.running.size, 0); await delay(200);
   assert.equal(rooms.state(store.get('test')!).position, paused.position);

@@ -35,9 +35,10 @@ export async function ffmpegArgs(config: Config, room: Room, source: Source): Pr
   if (config.vaapi) args.unshift('-vaapi_device', config.vaapi);
   args.push('-c:v', config.vaapi ? 'h264_vaapi' : 'libx264');
   if (!config.vaapi) args.push('-preset', 'veryfast', '-tune', 'zerolatency', '-profile:v', 'high');
+  // MoQ groups must start at a keyframe, with contiguous samples for each track.
   args.push('-b:v', '5000k', '-maxrate', '6000k', '-bufsize', '10000k', '-r', '30', '-g', '30', '-bf', '0',
     '-c:a', 'aac', '-ac', '2', '-ar', '48000', '-b:a', '160k', '-progress', 'pipe:3',
-    '-avoid_negative_ts', 'make_zero', '-f', 'mp4', '-movflags', '+empty_moov+default_base_moof',
+    '-avoid_negative_ts', 'make_zero', '-f', 'mp4', '-movflags', '+empty_moov+default_base_moof+frag_keyframe+separate_moof',
     '-frag_duration', '200000', '-flush_packets', '1', 'pipe:1');
   return args;
 }
