@@ -138,6 +138,7 @@ in
               proxy_set_header X-Original-URL https://${cfg.domain}$request_uri;
               proxy_ssl_server_name on;
               proxy_ssl_verify on;
+              proxy_ssl_verify_depth 3;
               proxy_ssl_trusted_certificate ${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt;
             '';
           };
@@ -149,6 +150,7 @@ in
               proxy_set_header X-Forwarded-Proto https;
               proxy_ssl_server_name on;
               proxy_ssl_verify on;
+              proxy_ssl_verify_depth 3;
               proxy_ssl_trusted_certificate ${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt;
             '';
           };
@@ -165,6 +167,7 @@ in
             proxy_ssl_server_name on;
             proxy_ssl_name ${cfg.relayDomain};
             proxy_ssl_verify on;
+            proxy_ssl_verify_depth 3;
             proxy_ssl_trusted_certificate ${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt;
             proxy_read_timeout 1h;
           '';
