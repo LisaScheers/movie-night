@@ -48,7 +48,7 @@ export function createApp(config: Config, rooms: Rooms) {
   const streams = new Map<string, number>();
   const server = createServer(async (req, res) => {
     res.setHeader('Referrer-Policy', 'no-referrer'); res.setHeader('X-Content-Type-Options', 'nosniff');
-    res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self' blob:; worker-src 'self' blob:; connect-src 'self' " + [...relayOrigins].join(' ') + '; frame-ancestors \'self\'');
+    res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' blob: 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self' blob:; worker-src 'self' blob:; connect-src 'self' " + [...relayOrigins].join(' ') + '; frame-ancestors \'self\'');
     try {
       const url = new URL(req.url ?? '/', 'http://localhost');
       if (url.pathname === '/internal/relay-auth' && req.method === 'POST') {
