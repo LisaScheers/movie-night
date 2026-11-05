@@ -144,10 +144,13 @@ in
           };
           "/outpost.goauthentik.io/" = {
             proxyPass = "${cfg.authentikUrl}/outpost.goauthentik.io/";
+            recommendedProxySettings = false;
             extraConfig = ''
               proxy_set_header Host $proxy_host;
               proxy_set_header X-Forwarded-Host ${cfg.domain};
               proxy_set_header X-Forwarded-Proto https;
+              proxy_set_header X-Real-IP $remote_addr;
+              proxy_set_header X-Forwarded-For $remote_addr;
               proxy_ssl_server_name on;
               proxy_ssl_verify on;
               proxy_ssl_verify_depth 3;

@@ -144,6 +144,7 @@ in
         MOVIE_NIGHT_MAX_ACTIVE_ROOMS = toString cfg.maxActiveRooms;
         JELLYFIN_URL = cfg.jellyfinUrl;
         JELLYFIN_USER_ID = cfg.jellyfinUserId;
+        FFMPEG_BIN = "${pkgs.ffmpeg}/bin/ffmpeg";
       }
       // lib.optionalAttrs (cfg.vaapiDevice != null) { MOVIE_NIGHT_VAAPI_DEVICE = cfg.vaapiDevice; };
       serviceConfig = {
